@@ -1,7 +1,6 @@
-import asyncio
 import json
-
-import requests
+from cian import captcha
+from cian.session import CianReqSession
 
 BASE_URL = 'https://www.cian.ru/cian-api/mobile-site/v1/map-search-offers/'
 
@@ -163,18 +162,14 @@ class CianConnector(object):
         return extracted_info
 
     @staticmethod
-    def get_raw_cian():
-        resp = requests.post(BASE_URL, data=json.dumps(DATA).encode('utf-8'), headers=HEADERS)
-        data = resp.content.decode('utf-8')
-        return data
+    def get_offers():
+        resp = CianReqSession.instance().post(BASE_URL, data=json.dumps(DATA).encode('utf-8'), headers=HEADERS)
+        raw_data = resp.content.decode('utf-8')
 
-    @staticmethod
-    def process_raw_offers(raw_data):
         if 'captcha' in raw_data:
-            # TODO: add captcha solving
-            print(raw_data)
-            print('captcha needed!')
-            raise NotImplementedError
+            print('Captcha needed!')
+            captcha.solve_recaptcha(resp.url, raw_data)
+            return CianConnector.get_offers()
         raw_data = json.loads(raw_data)
         raw_data = raw_data['data']
         offers = raw_data['offersSerialized']
@@ -183,9 +178,3 @@ class CianConnector(object):
             extracted = CianConnector.extract_info(offer)
             result.append(extracted)
         return result
-
-    @staticmethod
-    def get_offers():
-        raw_data = CianConnector.get_raw_cian()
-        return CianConnector.process_raw_offers(raw_data)
-
