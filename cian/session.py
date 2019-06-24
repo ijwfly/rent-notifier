@@ -4,7 +4,7 @@ import pickle
 import requests
 
 
-COOKIES_FILENAME = 'cookies.bin'
+COOKIES_FILENAME = 'cian_cookies.bin'
 
 
 class CianReqSession(object):
@@ -16,7 +16,6 @@ class CianReqSession(object):
             CianReqSession._instance = requests.session()
             CianReqSession.load_cookies()
         return CianReqSession._instance
-
 
     @staticmethod
     def load_cookies():
