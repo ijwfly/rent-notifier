@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import requests
@@ -141,16 +142,41 @@ USABLE_FIELDS = {
 }
 
 
-def get_offers():
-    resp = requests.post(BASE_URL, data=json.dumps(DATA).encode('utf-8'), headers=HEADERS)
-    data = json.loads(resp.content.decode('utf-8'))
-    data = data['data']
-    count = data['aggregatedCount']
-    offers = data['offersSerialized']
-    for offer in offers:
-        pass
+class CianConnector(object):
 
+    @staticmethod
+    def extract_info(full_info, usable_fields=None):
+        extracted_info = {}
+        if not usable_fields:
+            usable_fields = USABLE_FIELDS
+        for key, value in usable_fields.items():
+            if key not in full_info:
+                continue
+            if value is None:
+                extracted_info[key] = full_info[key]
+            elif type(value) is dict:
+                extracted_info[key] = CianConnector.extract_info(full_info[key], value)
+        return extracted_info
 
-if __name__ == '__main__':
-    get_offers()
+    @staticmethod
+    def get_offers():
+        resp = requests.post(BASE_URL, data=json.dumps(DATA).encode('utf-8'), headers=HEADERS)
+        data = resp.content.decode('utf-8')
+        if 'captcha' in data:
+            # TODO: add captcha solving
+            raise NotImplementedError
+        data = json.loads(data)
+        data = data['data']
+        offers = data['offersSerialized']
+        result = []
+        for offer in offers:
+            extracted = CianConnector.extract_info(offer)
+            result.append(extracted)
+        return result
+
+    @staticmethod
+    async def aget_offers():
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(None, CianConnector.get_offers)
+        return result
 
