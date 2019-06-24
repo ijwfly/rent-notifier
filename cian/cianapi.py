@@ -20,7 +20,11 @@ HEADERS = {
 
 DATA = {
     "_subdomain": "www",
-    "_path":"/?deal_type=1&engine_version=2&in_polygon%5B1%5D=37.4951_55.8224,37.4956_55.8209,37.4966_55.8195,37.4977_55.8181,37.4996_55.8171,37.5022_55.8169,37.5048_55.8171,37.5075_55.8174,37.5101_55.8178,37.5125_55.8184,37.5149_55.8191,37.5175_55.8195,37.5199_55.8201,37.5221_55.8209,37.5244_55.8216,37.5268_55.8221,37.5284_55.8233,37.5304_55.8244,37.5322_55.8255,37.5328_55.8276,37.5327_55.8291,37.5322_55.8306,37.532_55.8321,37.5338_55.8333,37.5357_55.8343,37.538_55.8353,37.54_55.8363,37.542_55.8373,37.5428_55.8387,37.5412_55.8399,37.5387_55.8401,37.5361_55.8399,37.5338_55.8392,37.5316_55.8384,37.529_55.8387,37.5274_55.8376,37.5255_55.8366,37.5245_55.8352,37.5228_55.8341,37.5216_55.8327,37.5201_55.8315,37.5184_55.8304,37.5175_55.829,37.5169_55.8276,37.5152_55.8264,37.5128_55.8256,37.5103_55.825,37.5078_55.8246,37.5051_55.8243,37.5022_55.8238,37.4997_55.8234,37.4972_55.8229,37.4949_55.8222&offer_type=flat&polygon_name%5B1%5D=Область+поиска&room2=1&type=4&screen_area=228&allow_precision_correction=0&zoom=13"
+    "_path":"/?deal_type=1&engine_version=2&in_polygon%5B1%5D=37.4951_55.8224,37.4956_55.8209,37.4966_55.8195,37.4977_55.8181,37.4996_55.8171,37.5022_55.8169,37.5048_55.8171,37.5075_55.8174,37.5101_55.8178,37.5125_55.8184,37.5149_55.8191,"
+            "37.5175_55.8195,37.5199_55.8201,37.5221_55.8209,37.5244_55.8216,37.5268_55.8221,37.5284_55.8233,37.5304_55.8244,37.5322_55.8255,37.5328_55.8276,37.5327_55.8291,37.5322_55.8306,37.532_55.8321,37.5338_55.8333,37.5357_55.8343,37."
+            "538_55.8353,37.54_55.8363,37.542_55.8373,37.5428_55.8387,37.5412_55.8399,37.5387_55.8401,37.5361_55.8399,37.5338_55.8392,37.5316_55.8384,37.529_55.8387,37.5274_55.8376,37.5255_55.8366,37.5245_55.8352,37.5228_55.8341,37.5216_55."
+            "8327,37.5201_55.8315,37.5184_55.8304,37.5175_55.829,37.5169_55.8276,37.5152_55.8264,37.5128_55.8256,37.5103_55.825,37.5078_55.8246,37.5051_55.8243,37.5022_55.8238,37.4997_55.8234,37.4972_55.8229,37.4949_55.8222&offer_type=flat&"
+            "polygon_name%5B1%5D=Область+поиска&room2=1&type=4"
 }
 
 
@@ -159,15 +163,21 @@ class CianConnector(object):
         return extracted_info
 
     @staticmethod
-    def get_offers():
+    def get_raw_cian():
         resp = requests.post(BASE_URL, data=json.dumps(DATA).encode('utf-8'), headers=HEADERS)
         data = resp.content.decode('utf-8')
-        if 'captcha' in data:
+        return data
+
+    @staticmethod
+    def process_raw_offers(raw_data):
+        if 'captcha' in raw_data:
             # TODO: add captcha solving
+            print(raw_data)
+            print('captcha needed!')
             raise NotImplementedError
-        data = json.loads(data)
-        data = data['data']
-        offers = data['offersSerialized']
+        raw_data = json.loads(raw_data)
+        raw_data = raw_data['data']
+        offers = raw_data['offersSerialized']
         result = []
         for offer in offers:
             extracted = CianConnector.extract_info(offer)
@@ -175,8 +185,7 @@ class CianConnector(object):
         return result
 
     @staticmethod
-    async def aget_offers():
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, CianConnector.get_offers)
-        return result
+    def get_offers():
+        raw_data = CianConnector.get_raw_cian()
+        return CianConnector.process_raw_offers(raw_data)
 
