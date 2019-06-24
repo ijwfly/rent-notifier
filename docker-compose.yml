@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  cian-process:
+    restart: always
+    image: cian-process
+    build: .
+    environment:
+      - PYTONUNBUFFERED=1
+      - PYTHONPATH=/app/
+    volumes:
+      - ".:/app"
+    entrypoint:
+      - python
+      - /app/cian/cian_processor.py
+
+  mongo:
+    restart: always
+    image: mongo
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
