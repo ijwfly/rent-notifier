@@ -54,7 +54,7 @@ class CianProcessor:
 
 if __name__ == '__main__':
     # initialize locale to show currencies correctly
-    locale.setlocale(locale.LC_ALL, 'ru_ru')
+    locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
     processor = CianProcessor()
     processor.process()
