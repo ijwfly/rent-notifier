@@ -150,6 +150,8 @@ class CianConnector(object):
     @staticmethod
     def extract_info(full_info, usable_fields=None):
         extracted_info = {}
+        if not full_info:
+            return {}
         if not usable_fields:
             usable_fields = USABLE_FIELDS
         for key, value in usable_fields.items():
