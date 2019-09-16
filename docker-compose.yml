@@ -12,7 +12,7 @@ services:
       - ".:/app"
     entrypoint:
       - python
-      - /app/cian/cian_processor.py
+      - /app/process.py
 
   mongo:
     restart: always
