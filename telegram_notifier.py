@@ -13,7 +13,7 @@ class CianNotifierBot:
         'add': 'добавлено',
     }
 
-    fields_to_ignore = ['statistic']
+    fields_to_ignore = ['statistic', 'priceChanges']
 
     @classmethod
     def check_ignored_field(cls, field_path):
@@ -32,7 +32,7 @@ class CianNotifierBot:
         for action, field_path, values in diff:
             action_text = cls.actions_map.get(action, action)
             if type(field_path) is not str:
-                field_path = '.'.join(field_path)
+                field_path = '.'.join(str(f) for f in field_path)
             if cls.check_ignored_field(field_path):
                 continue
             if action == 'change':
@@ -52,11 +52,14 @@ class CianNotifierBot:
     def get_offer_info(cls, offer):
         offer_link = cls.get_offer_link(offer)
         price = offer['bargainTerms']['price']
-        total_views = offer['statistic']['total']
-        daily_views = offer['statistic']['daily']
+        stats = offer.get('statisctic', {})
+        total_views = stats.get('total')
+        daily_views = stats.get('daily')
         price = locale.currency(price, grouping=True)
         added_date = offer['added']
-        text = f'{offer_link}\nЦена: {price}\nДобавлено: {added_date}\nПросмотров: {total_views}\nЗа сегодня: {daily_views}'
+        text = f'{offer_link}\nЦена: {price}\nДобавлено: {added_date}'
+        if total_views and daily_views:
+            text += '\nПросмотров: {total_views}\nЗа сегодня: {daily_views}'
         return text
 
 
