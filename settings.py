@@ -5,6 +5,7 @@ MONGO_CIAN_COLLECTION = 'cian_offers'
 
 CIAN_UPDATE_INTERVAL = 5 * 60  # 5 minutes
 CIAN_UPDATE_INTERVAL_ERROR = 60  # 1 minute
+CIAN_MAX_RESULT_SIZE = 28  # столько cian возвращает данных за один запрос
 
 RUCAPCHA_TOKEN = 'TOKEN_HERE'
 

@@ -4,6 +4,7 @@ import traceback
 
 import settings
 from cian.cianapi import CianConnector
+from cian.utils import scale_polygon
 from mongo_collection import MongoOffers
 from dictdiffer import diff
 
@@ -35,11 +36,21 @@ class CianProcessor:
         print('Starting cian processor...')
         while True:
             try:
-                print('Reading offers...')
-                offers = CianConnector.get_offers()
-                print(f'Got {len(offers)} offers...')
-                for offer in offers:
-                    self.process_current_offer(offer)
+                print('Reading basic info...')
+                basic_offers = CianConnector.get_basic_offers()
+                print(f'Clusterizing {len(basic_offers)} offers...')
+                clusterized_offers = CianConnector.clusterize_basic_offers(basic_offers)
+                print(f'Got {len(clusterized_offers)} clusters...')
+                print('Building polygons...')
+                polygons = CianConnector.get_convex_hulls(clusterized_offers)
+                for cluster_id, polygon in polygons.items():
+                    print(f'Reading offers inside cluster_id: {cluster_id}...')
+                    # увеличим полигон на 3%, чтобы влезали краевые точки
+                    polygon = scale_polygon(polygon, 1.03)
+                    offers = CianConnector.get_offers(polygon)
+                    print(f'Got {len(offers)}/{len(clusterized_offers[cluster_id])} offers...')
+                    for offer in offers:
+                        self.process_current_offer(offer)
 
                 interval = settings.CIAN_UPDATE_INTERVAL
                 print(f'Sleeping {interval} seconds...')
@@ -50,6 +61,7 @@ class CianProcessor:
                 interval = settings.CIAN_UPDATE_INTERVAL_ERROR
                 print(f'Sleeping {interval} seconds...')
                 time.sleep(interval)
+            print('---------------------------------------------')
 
 
 if __name__ == '__main__':
