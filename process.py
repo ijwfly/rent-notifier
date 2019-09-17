@@ -1,4 +1,5 @@
 import locale
+import threading
 import time
 import traceback
 
@@ -67,6 +68,12 @@ class CianProcessor:
 if __name__ == '__main__':
     # initialize locale to show currencies correctly
     locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+
+    # TODO: join, или переделать на асинхронность
+    th1 = threading.Thread(target=CianNotifierBot.process_personal_messages_queue)
+    th1.start()
+    th2 = threading.Thread(target=CianNotifierBot.process_group_messages_queue)
+    th2.start()
 
     processor = CianProcessor()
     processor.process()
