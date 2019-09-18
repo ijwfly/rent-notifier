@@ -120,7 +120,7 @@ class CianNotifierBot:
     def send_new_offer(cls, offer):
         info_text = cls.get_offer_info(offer)
         text = f'#новое предложение:\n{info_text}'
-        return cls.enqueue_message(settings.TELEGRAM_CHAT_ID, text)
+        return cls.enqueue_message(settings.TELEGRAM_NEW_OFFER_CHAT_ID, text)
 
     @classmethod
     def send_offer_changed(cls, offer, diff):
@@ -128,4 +128,4 @@ class CianNotifierBot:
         diff_text = cls.generate_readable_diff(diff)
         if diff_text:
             text = f'#изменение предложения:\n{info_text}\n\n{diff_text}'
-            return cls.enqueue_message(settings.TELEGRAM_CHAT_ID, text)
+            return cls.enqueue_message(settings.TELEGRAM_CHANGE_OFFER_CHAT_ID, text)
